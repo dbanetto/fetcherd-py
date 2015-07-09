@@ -1,0 +1,15 @@
+{
+    "source": {
+        "class": "web_client",
+        "settings": {
+            "url": "http://localhost:8000/"
+        }
+    },
+    "providers": {
+        "blacklist": [],
+        "whitelist": []
+    },
+    "daemon": {
+        "pid": "/tmp/fetcherd.pid"
+    }
+}
