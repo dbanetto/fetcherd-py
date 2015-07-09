@@ -3,18 +3,28 @@
 Usage:
     fetcherd (-h | --help)
     fetcherd --version
-    fetcherd (-d | --daemon) [-c <path> | --config=<config>]
+    fetcherd (-d | --daemon) [-c <path> | --config=<config>] [--log=<path>] [--verbose]
     fetcherd [--fetch | --sort] [-c <path> | --config=<config>]
 
 Options:
     -h --help                   Show this screen
     --version                   Show version
     -d --daemon                 Run as daemon
+    -c <path> --config=<path>   Config path [default: config.json]
+    --log=<path>                Path to save log [default: fetcherd.log]
+    --verbose                   Raise log level
     --fetch                     Run fetch
     --sort                      Run sort
 """
 from docopt import docopt
 
+from settings import Settings
+from fetch import fetch
+from sort import sort
+import sources
+import providers
+
+import logging
 import grp
 import signal
 import daemon
@@ -29,17 +39,10 @@ def main():
     pass
 
 
-def cleanup():
-    pass
-
-
-def reload_config():
-    pass
-
-
 def daemonize(settings):
-    pid = settings['pid']
-    working_dir = settings['working_directory']
+    pid = settings.get('pid', default='/tmp/fetcherd.pid')
+    working_dir = settings.get('working_directory', default='/tmp')
+    gid = settings.get('gid', default='nobody')
 
     context = daemon.DaemonContext(
         working_directory=working_dir,
@@ -48,12 +51,10 @@ def daemonize(settings):
         )
 
     context.signal_map = {
-        signal.SIGTERM: cleanup,
         signal.SIGHUP: 'terminate',
-        signal.SIGUSR1: reload_config,
         }
 
-    context.gid = grp.getgrnam('nobody').gr_gid
+    context.gid = grp.getgrnam(gid).gr_gid
 
     init()
 
@@ -64,5 +65,19 @@ if __name__ == '__main__':
     args = docopt(__doc__, version='fetcherd 0.1')
     print(args)
 
+    config = Settings(args['--config'])
+    logger = logging.getLogger('fetcherd')
+    log_level = logging.DEBUG if not args['--verbose'] else logging.INFO
+    logging.basicConfig(filename=args['--log'],
+                        level=logging.INFO)
+
+    loaded_sources = sources.get_sources()
+    current_souce = loaded_sources[config.source['class']](config.source['settings'])
+
     if args['--daemon']:
-        daemonize({'pid': '/tmp/fetcher.d', 'working_directory': '/tmp'})
+        daemonize(config)
+    elif args['--fetch']:
+        fetch(config, current_souce,
+              providers.get_providers())
+    elif args['--sort']:
+        sort(config, None)

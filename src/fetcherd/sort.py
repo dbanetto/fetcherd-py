@@ -1,3 +1,3 @@
 
-def sort():
+def sort(config, source):
     pass
