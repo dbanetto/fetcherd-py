@@ -4,11 +4,14 @@ class Source():
     Interface for a data source
     """
 
-    def get_series():
+    def __init__(self, config):
         pass
 
-    def get_providers():
+    def get_series(self):
         pass
 
-    def get_base_providers():
+    def get_providers(self):
+        pass
+
+    def get_base_providers(self, id, epi_count):
         pass
