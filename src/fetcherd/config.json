@@ -11,5 +11,28 @@
     },
     "daemon": {
         "pid": "/tmp/fetcherd.pid"
-    }
+	},
+	"fetch": {
+		"save_paths": {
+			"mp3$": "./podcasts"
+		},
+		"save_path_default": "./downloads",
+
+		"check_filesystem": true,
+		"search_paths": [
+			"./podcasts"
+		]
+	},
+	"sort": {
+		"save_paths": {
+			"rss": "./podcast"
+		},
+		"save_path_default": "./sorted",
+		"search_paths": [
+			"./downloads"
+		],
+		"providers_to_move":[
+			"roosterteeth"
+		]
+	}
 }
