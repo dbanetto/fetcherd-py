@@ -8,6 +8,7 @@ from source import Source
 def get_sources(src_path=path.dirname(__file__)):
     sources = {}
     logger = logging.getLogger('fetcherd')
+
     # reflection time
     # Load all Base Providers in this directory
     for file in glob(src_path + '/*.py'):
@@ -16,6 +17,7 @@ def get_sources(src_path=path.dirname(__file__)):
         # skip __init__.py
         if name in ['__init__.py', path.basename(__file__)]:
             continue
+
         # Get the module and class name
         # it is assumed that the class is the .title() of the file name
         file_name = name.split('.')[0]
@@ -27,9 +29,10 @@ def get_sources(src_path=path.dirname(__file__)):
                            class_name)
             if issubclass(type, Source):
                 sources.update({file_name: type})
-                logger.info(type, 'loaded as a source')
+                logger.info('{} loaded as a source from {}/{}.py'
+                            .format(class_name, src_path, file_name))
             else:
-                logger.warning(type, 'is not loaded due to not being a subtype of Source')
+                logger.error('{} is not a sub-class of Source'.format(class_name))
         except:
             logger.error('Failed to load {1} from {0}'.format(file_name,
                                                               class_name))

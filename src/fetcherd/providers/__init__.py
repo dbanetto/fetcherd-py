@@ -7,6 +7,8 @@ from provider import Provider
 
 def get_providers(src_path=path.dirname(__file__)):
     providers = {}
+    logger = logging.getLogger('fetcherd')
+
     # reflection time
     # Load all Base Providers in this directory
     for file in glob(src_path + '/*.py'):
@@ -27,9 +29,11 @@ def get_providers(src_path=path.dirname(__file__)):
                            class_name)
             if issubclass(type, Provider):
                 providers.update({file_name: type})
-                logging.info(type, 'loaded as a provider')
+                logger.info('{} loaded as a provider from {}/{}.py'
+                            .format(class_name, src_path, file_name))
             else:
-                logging.error(type, 'is not loaded due to not being a subtype of Provider')
+                logger.error('{} is not a sub-class of Provider'
+                             .format(class_name))
         except:
             logging.error('Failed to load {1} from {0}'.format(file_name,
                                                                class_name))

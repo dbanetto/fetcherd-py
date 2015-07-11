@@ -1,5 +1,6 @@
 import logging
 import html
+import os
 
 
 def fetch(config, source, base_providers):
@@ -8,17 +9,17 @@ def fetch(config, source, base_providers):
 
     for prov in source.get_base_providers():
         if prov['name'] not in base_providers:
-            logger.info('Unsupported Base Provider : ' + prov['name'])
+            logger.warning('Unsupported Base Provider : ' + prov['name'])
         else:
-            logger.info('Loaded', prov['name'])
+            logger.info('Loaded {}'.format(prov['name']))
 
     for prov in source.get_providers():
         if prov['base_provider'] in base_providers:
             providers.update({prov['id']:
                               base_providers[prov['base_provider']](prov)})
-            logger.info('Loaded', prov['name'],
-                        'with options',
-                        prov['base_provider_options'])
+            logger.info('Loaded {} with options {}'
+                        .format(prov['name'],
+                                prov['base_provider_options']))
         else:
             logger.warning('Unsupported Base Provider \"' +
                            prov['base_provider'] +
@@ -27,15 +28,34 @@ def fetch(config, source, base_providers):
 
     for series in source.get_series():
         if series['provider_id'] in providers:
-            logger.info("Fetching", html.unescape(series['title']))
+            logger.info("Fetching {}".format(html.unescape(series['title'])))
             provider = providers[series['provider_id']]
+            current = series['current_count']
 
             for ep in provider.fetch(series):
                 numb, link, title = ep
-                logger.info('Downloading', title)
-                provider.download(link, config)
-                logging.info('Updating', title, 'to episode count', numb)
-                source.post_update_episode_count(series['id'], numb)
+                current = max(numb, current)
+                if numb > series['current_count']:
+                    logger.info('Downloading {}'.format(title))
+                    (dwn, name) = provider.download(link, config)
+                    download(config, dwn, name)
+
+            if current > series['current_count']:
+                logging.info('Updating {} to episode count {}'
+                             .format(series['title'], current))
+                source.post_update_episode_count(series['id'], current)
 
         else:
-            logger.warning("Unsupported provider id: {}".format(series['provider_id']))
+            logger.warning("Unsupported provider id: {}"
+                           .format(series['provider_id']))
+
+
+def download(config, stream, filename):
+    logger = logging.getLogger('fetcherd')
+    path = "./torrent"
+    logger.info("Downloading {} to {}".format(filename, path))
+    with open(os.path.join(path, filename), 'wb') as f:
+        for chunk in stream:
+            if chunk:
+                f.write(chunk)
+                f.flush()

@@ -25,6 +25,7 @@ import sources
 import providers
 
 import logging
+import logging.config
 import grp
 import signal
 import daemon
@@ -61,18 +62,44 @@ def daemonize(settings):
     with context:
         main()
 
+logging.config.dictConfig({
+    'version': 1,
+    'disable_existing_loggers': False,  # this fixes the problem
+
+    'formatters': {
+        'simple': {
+            'format': '%(levelname)s: %(message)s'
+        },
+        'full': {
+            'format': '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+        }
+    },
+    'handlers': {
+        'default': {
+            'formatter': 'simple',
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        '': {
+            'handlers': ['default'],
+            'level': 'INFO',
+            'propagate': True
+        }
+    }
+})
+
 if __name__ == '__main__':
     args = docopt(__doc__, version='fetcherd 0.1')
     print(args)
 
     config = Settings(args['--config'])
-    logger = logging.getLogger('fetcherd')
-    log_level = logging.DEBUG if not args['--verbose'] else logging.INFO
-    logging.basicConfig(filename=args['--log'],
-                        level=logging.INFO)
 
     loaded_sources = sources.get_sources()
     current_souce = loaded_sources[config.source['class']](config.source['settings'])
+
+    logging.debug("Loaded Source {}".format(config.source['class']))
 
     if args['--daemon']:
         daemonize(config)
