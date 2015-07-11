@@ -5,6 +5,7 @@ Usage:
     fetcherd --version
     fetcherd (-d | --daemon) [-c <path> | --config=<config>] [--log=<path>] [--verbose]
     fetcherd [--fetch | --sort] [-c <path> | --config=<config>]
+    fetcherd --dump-providers [-c <path> | --config=<config>]
 
 Options:
     -h --help                   Show this screen
@@ -15,6 +16,7 @@ Options:
     --verbose                   Raise log level
     --fetch                     Run fetch
     --sort                      Run sort
+    --push-providers            Prints provider schema
 """
 from docopt import docopt
 
@@ -49,11 +51,11 @@ def daemonize(settings):
         working_directory=working_dir,
         umask=0o002,
         pidfile=lockfile.FileLock(pid),
-        )
+    )
 
     context.signal_map = {
         signal.SIGHUP: 'terminate',
-        }
+    }
 
     context.gid = grp.getgrnam(gid).gr_gid
 
@@ -64,7 +66,7 @@ def daemonize(settings):
 
 logging.config.dictConfig({
     'version': 1,
-    'disable_existing_loggers': False,  # this fixes the problem
+    'disable_existing_loggers': False,
 
     'formatters': {
         'simple': {
@@ -92,19 +94,23 @@ logging.config.dictConfig({
 
 if __name__ == '__main__':
     args = docopt(__doc__, version='fetcherd 0.1')
-    print(args)
-
     config = Settings(args['--config'])
 
     loaded_sources = sources.get_sources()
     current_souce = loaded_sources[config.source['class']](config.source['settings'])
 
     logging.debug("Loaded Source {}".format(config.source['class']))
+    logging.debug("Args {}".format(args))
 
     if args['--daemon']:
+        logging.setLevel(logging.warn)
         daemonize(config)
     elif args['--fetch']:
         fetch(config, current_souce,
               providers.get_providers())
     elif args['--sort']:
-        sort(config, None)
+        sort(config, current_souce)
+    elif args['--dump-providers']:
+        import json
+        for (key, prov) in providers.get_providers().items():
+            print(key, json.dumps(prov.get_options_schema()))
