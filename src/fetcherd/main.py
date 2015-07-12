@@ -26,43 +26,13 @@ from sort import sort
 import sources
 import providers
 
+from logging import handlers
 import logging
 import logging.config
 import grp
 import signal
 import daemon
 import lockfile
-
-
-def init():
-    pass
-
-
-def main():
-    pass
-
-
-def daemonize(settings):
-    pid = settings.get('pid', default='/tmp/fetcherd.pid')
-    working_dir = settings.get('working_directory', default='/tmp')
-    gid = settings.get('gid', default='nobody')
-
-    context = daemon.DaemonContext(
-        working_directory=working_dir,
-        umask=0o002,
-        pidfile=lockfile.FileLock(pid),
-    )
-
-    context.signal_map = {
-        signal.SIGHUP: 'terminate',
-    }
-
-    context.gid = grp.getgrnam(gid).gr_gid
-
-    init()
-
-    with context:
-        main()
 
 logging.config.dictConfig({
     'version': 1,
@@ -81,7 +51,7 @@ logging.config.dictConfig({
             'formatter': 'simple',
             'level': 'INFO',
             'class': 'logging.StreamHandler',
-        },
+        }
     },
     'loggers': {
         '': {
@@ -91,6 +61,39 @@ logging.config.dictConfig({
         }
     }
 })
+
+
+def init():
+    pass
+
+
+def main():
+    pass
+
+
+def daemonize(config):
+    pid = config.daemon['pid'] if 'pid' in config.daemon else '/tmp/fetcherd.pid'
+    working_dir = config.daemon['working_dir'] if 'working_dir' in config.daemon else '/tmp'
+    gid = config.daemon['gid'] if 'gid' in config.daemon else 'nobody'
+
+    context = daemon.DaemonContext(
+        working_directory=working_dir,
+        umask=0o002,
+        pidfile=lockfile.FileLock(pid),
+        detach_process=True,
+    )
+
+    context.signal_map = {
+        signal.SIGHUP: 'terminate',
+    }
+
+    # FIXME: disabled until can check we have permission to change
+    # context.gid = grp.getgrnam(gid).gr_gid
+
+    init()
+
+    with context:
+        main()
 
 if __name__ == '__main__':
     args = docopt(__doc__, version='fetcherd 0.1')
@@ -103,7 +106,13 @@ if __name__ == '__main__':
     logging.debug("Args {}".format(args))
 
     if args['--daemon']:
-        logging.setLevel(logging.warn)
+        file = handlers.RotatingFileHandler(
+            args['--log'],
+            maxBytes=10485760,
+            encoding='utf8'
+        )
+        file.setLevel(logging.INFO)
+        logging.getLogger('').addHandler(file)
         daemonize(config)
     elif args['--fetch']:
         fetch(config, current_souce,
