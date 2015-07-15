@@ -8,7 +8,12 @@ setup(name='fetcherd',
       author='David Barnett',
       packages=['fetcherd'],
       package_dir={'fetcherd': 'src/fetcherd'},
-      install_requires=['requests', 'python-daemon', 'docopts'],
+      install_requires=[
+          'requests',
+          'docopts',
+          'apscheduler',
+          'daemonize',
+      ],
       entry_points={
           'console_scripts': [
               'fetcherd=fetchderd.main:main'

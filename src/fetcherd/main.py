@@ -12,7 +12,7 @@ Options:
     --version                   Show version
     -d --daemon                 Run as daemon
     -c <path> --config=<path>   Config path [default: config.json]
-    --log=<path>                Path to save log [default: fetcherd.log]
+    --log=<path>                Path to save log [default: /tmp/fetcherd.log]
     --verbose                   Raise log level
     --fetch                     Run fetch
     --sort                      Run sort
@@ -26,6 +26,7 @@ from sort import sort
 import sources
 import providers
 
+from daemonize import Daemonize
 from logging import handlers
 import logging
 import logging.config
@@ -38,9 +39,6 @@ logging.config.dictConfig({
         'simple': {
             'format': '%(levelname)s: %(message)s'
         },
-        'full': {
-            'format': '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
-        }
     },
     'handlers': {
         'default': {
@@ -59,16 +57,10 @@ logging.config.dictConfig({
 })
 
 
-def init():
-    pass
-
-
-def main():
-    pass
-
-
-def daemonize(args, config):
+def main(args, config):
     import os
+    import getpass
+
     file = handlers.RotatingFileHandler(
         args['--log'],
         maxBytes=10485760,
@@ -80,29 +72,49 @@ def daemonize(args, config):
 
     logging.getLogger('').addHandler(file)
 
-    logger = logging.getLogger('daemon')
-
-    pid = config.daemon['pid'] if 'pid' in config.daemon else '/tmp/fetcherd.pid'
+    logger.info("Entered main")
 
     working_dir = config.daemon['working_dir'] if 'working_dir' in config.daemon else '/tmp'
 
-    logger.info("change dir to {}".format(working_dir))
     os.chdir(working_dir)
+    logger.info("Working directory: {}".format(working_dir))
+    logger.info("Running as user {}".format(getpass.getuser()))
 
+
+def daemonize(args, config):
+    logger = logging.getLogger('daemon')
+    pid = config.daemon['pid'] if 'pid' in config.daemon else '/tmp/fetcherd.pid'
+    user = config.daemon['user'] if 'user' in config.daemon else None
+    group = config.daemon['group'] if 'group' in config.daemon else None
+
+    daemon = Daemonize("fetcherd",
+                       pid,
+                       main,
+                       privileged_action=lambda: [args, config],
+                       user=user,
+                       group=group,
+                       )
+    try:
+        daemon.start()
+    except Exception as e:
+        logger.critical("Error during daemonize: {}".format(e))
 
 if __name__ == '__main__':
     args = docopt(__doc__, version='fetcherd 0.1')
     config = Settings(args['--config'])
+    logger = logging.getLogger('setup')
+
+    if args['--daemon']:
+        daemonize(args, config)
+
+    logger.debug("Start with args {}".format(args))
 
     loaded_sources = sources.get_sources()
     current_souce = loaded_sources[config.source['class']](config.source['settings'])
 
-    logging.debug("Loaded Source {}".format(config.source['class']))
-    logging.debug("Args {}".format(args))
+    logger.debug("Loaded Source {}".format(config.source['class']))
 
-    if args['--daemon']:
-        daemonize(args, config)
-    elif args['--fetch']:
+    if args['--fetch']:
         fetch(config, current_souce,
               providers.get_providers())
     elif args['--sort']:
