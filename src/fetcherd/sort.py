@@ -45,4 +45,4 @@ def sort(config, source):
                                 shutil.copy(path.join(root, f), save_path)
                                 op = 'Copying'
 
-                            logger.info('{} {} to'.format(op, f, save_path))
+                            logger.info('{} {} to {}'.format(op, f, save_path))
