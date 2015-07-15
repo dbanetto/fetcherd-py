@@ -29,10 +29,6 @@ import providers
 from logging import handlers
 import logging
 import logging.config
-import grp
-import signal
-import daemon
-import lockfile
 
 logging.config.dictConfig({
     'version': 1,
@@ -71,29 +67,28 @@ def main():
     pass
 
 
-def daemonize(config):
-    pid = config.daemon['pid'] if 'pid' in config.daemon else '/tmp/fetcherd.pid'
-    working_dir = config.daemon['working_dir'] if 'working_dir' in config.daemon else '/tmp'
-    gid = config.daemon['gid'] if 'gid' in config.daemon else 'nobody'
-
-    context = daemon.DaemonContext(
-        working_directory=working_dir,
-        umask=0o002,
-        pidfile=lockfile.FileLock(pid),
-        detach_process=True,
+def daemonize(args, config):
+    import os
+    file = handlers.RotatingFileHandler(
+        args['--log'],
+        maxBytes=10485760,
+        encoding='utf8'
     )
+    file.setLevel(logging.DEBUG)
+    file.setFormatter(logging.Formatter(
+        '%(asctime)s [%(levelname)s] %(name)s: %(message)s'))
 
-    context.signal_map = {
-        signal.SIGHUP: 'terminate',
-    }
+    logging.getLogger('').addHandler(file)
 
-    # FIXME: disabled until can check we have permission to change
-    # context.gid = grp.getgrnam(gid).gr_gid
+    logger = logging.getLogger('daemon')
 
-    init()
+    pid = config.daemon['pid'] if 'pid' in config.daemon else '/tmp/fetcherd.pid'
 
-    with context:
-        main()
+    working_dir = config.daemon['working_dir'] if 'working_dir' in config.daemon else '/tmp'
+
+    logger.info("change dir to {}".format(working_dir))
+    os.chdir(working_dir)
+
 
 if __name__ == '__main__':
     args = docopt(__doc__, version='fetcherd 0.1')
@@ -106,14 +101,7 @@ if __name__ == '__main__':
     logging.debug("Args {}".format(args))
 
     if args['--daemon']:
-        file = handlers.RotatingFileHandler(
-            args['--log'],
-            maxBytes=10485760,
-            encoding='utf8'
-        )
-        file.setLevel(logging.INFO)
-        logging.getLogger('').addHandler(file)
-        daemonize(config)
+        daemonize(args, config)
     elif args['--fetch']:
         fetch(config, current_souce,
               providers.get_providers())
