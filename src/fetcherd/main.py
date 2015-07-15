@@ -57,31 +57,8 @@ logging.config.dictConfig({
 })
 
 
-def main(args, config):
-    import os
-    import getpass
-
-    file = handlers.RotatingFileHandler(
-        args['--log'],
-        maxBytes=10485760,
-        encoding='utf8'
-    )
-    file.setLevel(logging.DEBUG)
-    file.setFormatter(logging.Formatter(
-        '%(asctime)s [%(levelname)s] %(name)s: %(message)s'))
-
-    logging.getLogger('').addHandler(file)
-
-    logger.info("Entered main")
-
-    working_dir = config.daemon['working_dir'] if 'working_dir' in config.daemon else '/tmp'
-
-    os.chdir(working_dir)
-    logger.info("Working directory: {}".format(working_dir))
-    logger.info("Running as user {}".format(getpass.getuser()))
-
-
 def daemonize(args, config):
+    from daemon import main
     logger = logging.getLogger('daemon')
     pid = config.daemon['pid'] if 'pid' in config.daemon else '/tmp/fetcherd.pid'
     user = config.daemon['user'] if 'user' in config.daemon else None
