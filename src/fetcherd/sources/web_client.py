@@ -1,6 +1,6 @@
 import requests
 import json
-from source import Source
+from fetcherd.source import Source
 
 
 class WebClient(Source):

@@ -1,4 +1,4 @@
-from provider import Provider
+from fetcherd.provider import Provider
 
 
 class Dummy(Provider):
