@@ -33,7 +33,7 @@ def main(args, config):
     logger.info("Working directory: {}".format(working_dir))
     logger.info("Running as user {}".format(getpass.getuser()))
 
-    provs = load_providers(config.provider['modules_path'])
+    provs = load_providers(config.providers['modules_path'])
 
     loaded_source = load_source(config.source['modules_path'],
                                 config.source['class'])
