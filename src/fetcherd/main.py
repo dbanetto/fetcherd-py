@@ -48,7 +48,7 @@ logging.config.dictConfig({
     'loggers': {
         '': {
             'handlers': ['default'],
-            'level': 'INFO',
+            'level': 'WARN',
             'propagate': True
         }
     }
@@ -84,7 +84,7 @@ def main():
         daemonize(args, config)
     elif args['--dump-providers']:
         import json
-        for (key, prov) in load_providers(config.provider['modules_path']).items():
+        for (key, prov) in load_providers(config.providers['modules_path']).items():
             print(key, json.dumps(prov.get_options_schema()))
         exit()
 

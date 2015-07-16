@@ -2,6 +2,7 @@ import logging
 import html
 import os
 
+from fetcherd.util import get_path_regex
 
 def fetch(config, source, base_providers):
     providers = {}
@@ -52,7 +53,8 @@ def fetch(config, source, base_providers):
 
 def download(config, stream, filename):
     logger = logging.getLogger('fetcherd')
-    path = "./torrent"
+    path = get_path_regex(filename, config.fetch['save_paths'],
+                          default=config.fetch['save_path_default'])
     logger.info("Downloading {} to {}".format(filename, path))
     with open(os.path.join(path, filename), 'wb') as f:
         for chunk in stream:
