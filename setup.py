@@ -16,7 +16,7 @@ setup(name='fetcherd',
       ],
       entry_points={
           'console_scripts': [
-              'fetcherd=fetchderd.main:main'
+              'fetcherd=fetcherd.main:main'
           ]
       }
       )

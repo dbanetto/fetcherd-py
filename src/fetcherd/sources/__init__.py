@@ -2,7 +2,7 @@ import logging
 
 from glob import glob
 from os import path
-from source import Source
+from fetcherd.source import Source
 
 
 def get_sources(src_path=path.dirname(__file__)):

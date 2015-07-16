@@ -3,10 +3,10 @@ import getpass
 import logging
 from logging import handlers
 
-from fetch import fetch
-from sort import sort
-import sources
-import providers
+from fetcherd.fetch import fetch
+from fetcherd.sort import sort
+from fetcherd import sources
+from fetcherd import providers
 
 from apscheduler.schedulers.background import BlockingScheduler
 

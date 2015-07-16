@@ -20,14 +20,13 @@ Options:
 """
 from docopt import docopt
 
-from settings import Settings
-from fetch import fetch
-from sort import sort
-import sources
-import providers
+from fetcherd.settings import Settings
+from fetcherd.fetch import fetch
+from fetcherd.sort import sort
+from fetcherd import sources
+from fetcherd import providers
 
 from daemonize import Daemonize
-from logging import handlers
 import logging
 import logging.config
 
@@ -76,7 +75,8 @@ def daemonize(args, config):
     except Exception as e:
         logger.critical("Error during daemonize: {}".format(e))
 
-if __name__ == '__main__':
+
+def main():
     args = docopt(__doc__, version='fetcherd 0.1')
     config = Settings(args['--config'])
     logger = logging.getLogger('setup')
@@ -100,3 +100,6 @@ if __name__ == '__main__':
         import json
         for (key, prov) in providers.get_providers().items():
             print(key, json.dumps(prov.get_options_schema()))
+
+if __name__ == '__main__':
+    main()

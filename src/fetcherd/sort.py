@@ -2,7 +2,7 @@ import logging
 import os
 import shutil
 from os import path
-from util import get_path
+from fetcherd.util import get_path
 
 
 def sort(config, source):

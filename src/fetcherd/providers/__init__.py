@@ -2,7 +2,7 @@ import logging
 
 from glob import glob
 from os import path
-from provider import Provider
+from fetcherd.provider import Provider
 
 
 def get_providers(src_path=path.dirname(__file__)):
