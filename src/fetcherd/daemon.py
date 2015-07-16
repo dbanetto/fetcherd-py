@@ -5,8 +5,7 @@ from logging import handlers
 
 from fetcherd.fetch import fetch
 from fetcherd.sort import sort
-from fetcherd import sources
-from fetcherd import providers
+from fetcherd.util import load_source, load_providers
 
 from apscheduler.schedulers.background import BlockingScheduler
 
@@ -34,9 +33,11 @@ def main(args, config):
     logger.info("Working directory: {}".format(working_dir))
     logger.info("Running as user {}".format(getpass.getuser()))
 
-    provs = providers.get_providers()
-    loaded_sources = sources.get_sources()
-    current_souce = loaded_sources[config.source['class']](config.source['settings'])
+    provs = load_providers(config.provider['modules_path'])
+
+    loaded_source = load_source(config.source['modules_path'],
+                                config.source['class'])
+    current_souce = loaded_source(config.source['settings'])
 
     scheduler.add_job(lambda: fetch(config, current_souce, provs),
                       'cron', minute=30, id='fetch')

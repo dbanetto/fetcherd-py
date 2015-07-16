@@ -1,11 +1,13 @@
 {
     "source": {
+        "modules_path": "/etc/fetcherd/sources",
         "class": "web_client",
         "settings": {
             "url": "http://localhost:8000/"
         }
     },
     "providers": {
+        "modules_path": "/etc/fetcherd/providers",
         "blacklist": [],
         "whitelist": []
     },

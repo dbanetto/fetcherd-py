@@ -23,8 +23,7 @@ from docopt import docopt
 from fetcherd.settings import Settings
 from fetcherd.fetch import fetch
 from fetcherd.sort import sort
-from fetcherd import sources
-from fetcherd import providers
+from fetcherd.util import load_source, load_providers
 
 from daemonize import Daemonize
 import logging
@@ -85,20 +84,20 @@ def main():
         daemonize(args, config)
     elif args['--dump-providers']:
         import json
-        for (key, prov) in providers.get_providers().items():
+        for (key, prov) in load_providers(config.provider['modules_path']).items():
             print(key, json.dumps(prov.get_options_schema()))
         exit()
 
     logger.debug("Start with args {}".format(args))
 
-    loaded_sources = sources.get_sources()
-    current_souce = loaded_sources[config.source['class']](config.source['settings'])
+    loaded_source = load_source(config.source['modules_path'], config.source['class'])
+    current_souce = loaded_source(config.source['settings'])
 
     logger.debug("Loaded Source {}".format(config.source['class']))
 
     if args['--fetch']:
         fetch(config, current_souce,
-              providers.get_providers())
+              load_providers(config.providers['modules_path']))
     elif args['--sort']:
         sort(config, current_souce)
 
