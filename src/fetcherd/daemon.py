@@ -10,6 +10,7 @@ from fetcherd import providers
 
 from apscheduler.schedulers.background import BlockingScheduler
 
+
 def main(args, config):
     file = handlers.RotatingFileHandler(
         args['--log'],
