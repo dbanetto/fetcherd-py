@@ -11,7 +11,7 @@ Options:
     -h --help                   Show this screen
     --version                   Show version
     -d --daemon                 Run as daemon
-    -c <path> --config=<path>   Config path [default: config.json]
+    -c <path> --config=<path>   Config path [default: /etc/fetcherd/config.json]
     --log=<path>                Path to save log [default: /tmp/fetcherd.log]
     --verbose                   Raise log level
     --fetch                     Run fetch
@@ -57,7 +57,7 @@ logging.config.dictConfig({
 
 
 def daemonize(args, config):
-    from daemon import main
+    from fetcherd.daemon import main
     logger = logging.getLogger('daemon')
     pid = config.daemon['pid'] if 'pid' in config.daemon else '/tmp/fetcherd.pid'
     user = config.daemon['user'] if 'user' in config.daemon else None
@@ -83,6 +83,11 @@ def main():
 
     if args['--daemon']:
         daemonize(args, config)
+    elif args['--dump-providers']:
+        import json
+        for (key, prov) in providers.get_providers().items():
+            print(key, json.dumps(prov.get_options_schema()))
+        exit()
 
     logger.debug("Start with args {}".format(args))
 
@@ -96,10 +101,6 @@ def main():
               providers.get_providers())
     elif args['--sort']:
         sort(config, current_souce)
-    elif args['--dump-providers']:
-        import json
-        for (key, prov) in providers.get_providers().items():
-            print(key, json.dumps(prov.get_options_schema()))
 
 if __name__ == '__main__':
     main()
