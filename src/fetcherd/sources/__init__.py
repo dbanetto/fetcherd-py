@@ -32,9 +32,10 @@ def get_sources(src_path=path.dirname(__file__)):
                 logger.info('{} loaded as a source from {}/{}.py'
                             .format(class_name, src_path, file_name))
             else:
-                logger.error('{} is not a sub-class of Source'.format(class_name))
-        except:
-            logger.error('Failed to load {1} from {0}'.format(file_name,
-                                                              class_name))
+                logger.error('{} is not a sub-class of Source'
+                             .format(class_name))
+        except Exception as e:
+            logger.error('Failed to load {} from {}: {}'
+                         .format(class_name, file_name, e))
 
     return sources

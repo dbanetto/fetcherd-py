@@ -34,7 +34,8 @@ def get_providers(src_path=path.dirname(__file__)):
             else:
                 logger.error('{} is not a sub-class of Provider'
                              .format(class_name))
-        except:
-            logging.error('Failed to load {1} from {0}'.format(file_name,
-                                                               class_name))
-    return providers
+        except Exception as e:
+            logging.error('Failed to load {} from {} {}'
+                          .format(class_name, file_name, e))
+
+        return providers
