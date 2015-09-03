@@ -3,6 +3,8 @@ import getpass
 import logging
 from logging import handlers
 
+from fetcherd import runner
+
 def daemon(args, config):
     file = handlers.RotatingFileHandler(
         args['--log'],
