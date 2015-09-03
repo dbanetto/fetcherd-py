@@ -3,7 +3,7 @@
 Usage:
     fetcherd (-h | --help)
     fetcherd --version
-    fetcherd (-d | --daemon) [-c <path> | --config=<config>] [--log=<path>] [--verbose]
+    fetcherd [-d | --daemon] [-c <path> | --config=<config>] [--log=<path>] [--verbose]
     fetcherd [--fetch | --sort] [-c <path> | --config=<config>]
     fetcherd --dump-providers [-c <path> | --config=<config>]
 
@@ -24,6 +24,7 @@ from fetcherd.settings import Settings
 from fetcherd.fetch import fetch
 from fetcherd.sort import sort
 from fetcherd.util import load_source, load_providers
+from fetcherd import runner
 
 from daemonize import Daemonize
 import logging
@@ -35,7 +36,7 @@ logging.config.dictConfig({
 
     'formatters': {
         'simple': {
-            'format': '%(levelname)s: %(message)s'
+            'format': '[%(name)s] %(levelname)s: %(message)s'
         },
     },
     'handlers': {
@@ -48,7 +49,7 @@ logging.config.dictConfig({
     'loggers': {
         '': {
             'handlers': ['default'],
-            'level': 'WARN',
+            'level': 'INFO',
             'propagate': True
         }
     }
@@ -56,7 +57,7 @@ logging.config.dictConfig({
 
 
 def daemonize(args, config):
-    from fetcherd.daemon import main
+    from fetcherd.daemon import daemon
     logger = logging.getLogger('daemon')
     pid = config.daemon['pid'] if 'pid' in config.daemon else '/tmp/fetcherd.pid'
     user = config.daemon['user'] if 'user' in config.daemon else None
@@ -64,7 +65,7 @@ def daemonize(args, config):
 
     daemon = Daemonize("fetcherd",
                        pid,
-                       main,
+                       daemon,
                        privileged_action=lambda: [args, config],
                        user=user,
                        group=group,
@@ -100,6 +101,8 @@ def main():
               load_providers(config.providers['modules_path']))
     elif args['--sort']:
         sort(config, current_souce)
+    else:
+        runner.start(args, config)
 
 if __name__ == '__main__':
     main()

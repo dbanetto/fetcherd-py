@@ -14,6 +14,11 @@
     "daemon": {
         "pid": "/tmp/fetcherd.pid"
     },
+    "webui": {
+        "enable": true,
+        "host": "localhost",
+        "port": 8181
+    },
     "fetch": {
         "save_paths": {
             "mp3$": "./podcasts"

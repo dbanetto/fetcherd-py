@@ -15,6 +15,8 @@ setup(name='fetcherd',
           'docopts',
           'apscheduler',
           'daemonize',
+          'bottle',
+          'paste'
       ],
       entry_points={
           'console_scripts': [
