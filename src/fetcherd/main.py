@@ -25,7 +25,10 @@ from fetcherd.fetcherd import Fetcherd
 
 from daemonize import Daemonize
 import logging
+import os
 import logging.config
+import getpass
+from logging import handlers
 
 logging.config.dictConfig({
     'version': 1,
