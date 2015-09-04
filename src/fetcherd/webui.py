@@ -59,7 +59,7 @@ class WebUI(Bottle):
             return {
                 'success': True
             }
-        except e:
+        except Exception as e:
             return {
                 'success': False,
                 'error': '{}'.format(str(e))
@@ -71,7 +71,7 @@ class WebUI(Bottle):
             return {
                 'success': True
             }
-        except e:
+        except Exception as e:
             return {
                 'success': False,
                 'error': '{}'.format(str(e))
