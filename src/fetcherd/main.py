@@ -21,10 +21,7 @@ Options:
 from docopt import docopt
 
 from fetcherd.settings import Settings
-from fetcherd.fetch import fetch
-from fetcherd.sort import sort
-from fetcherd.util import load_source, load_providers
-from fetcherd import runner
+from fetcherd.fetcherd import Fetcherd
 
 from daemonize import Daemonize
 import logging
@@ -55,9 +52,7 @@ logging.config.dictConfig({
     }
 })
 
-
-def daemonize(args, config):
-    from fetcherd.daemon import daemon
+def daemonize(fetcher, args, config):
     logger = logging.getLogger('daemon')
     pid = config.daemon['pid'] if 'pid' in config.daemon else '/tmp/fetcherd.pid'
     user = config.daemon['user'] if 'user' in config.daemon else None
@@ -65,44 +60,65 @@ def daemonize(args, config):
 
     daemon = Daemonize("fetcherd",
                        pid,
-                       daemon,
-                       privileged_action=lambda: [args, config],
+                       daemon_setup,
+                       privileged_action=lambda: [fetcher, args, config],
                        user=user,
                        group=group,
                        )
     try:
+        logger.info("Forked")
         daemon.start()
     except Exception as e:
         logger.critical("Error during daemonize: {}".format(e))
 
+
+def daemon_setup(fetcher, args, config):
+    file = handlers.RotatingFileHandler(
+        args['--log'],
+        maxBytes=10485760,
+        encoding='utf8'
+    )
+    file.setLevel(logging.DEBUG)
+    file.setFormatter(logging.Formatter(
+        '%(asctime)s [%(levelname)s] %(name)s: %(message)s'))
+
+    logger = logging.getLogger('daemon')
+    logger.addHandler(file)
+    logging.getLogger('').addHandler(file)
+
+    logger.debug("Setup log file in {}".format(args['--log']))
+
+    working_dir = config.daemon['working_dir'] if 'working_dir' in config.daemon else '/tmp'
+
+    os.chdir(working_dir)
+    logger.info("Working directory: {}".format(working_dir))
+    logger.info("Running as user {}".format(getpass.getuser()))
+
+    fetcher.start()
 
 def main():
     args = docopt(__doc__, version='fetcherd 0.1')
     config = Settings(args['--config'])
     logger = logging.getLogger('setup')
 
+    Fetcher = Fetcherd(args, config)
+
     if args['--daemon']:
-        daemonize(args, config)
+        daemonize(Fetcher, args, config)
     elif args['--dump-providers']:
         import json
-        for (key, prov) in load_providers(config.providers['modules_path']).items():
+        for (key, prov) in Fetcher.providers.items():
             print(key, json.dumps(prov.get_options_schema()))
-        exit()
+        exit(0)
 
     logger.debug("Start with args {}".format(args))
 
-    loaded_source = load_source(config.source['modules_path'], config.source['class'])
-    current_souce = loaded_source(config.source['settings'])
-
-    logger.debug("Loaded Source {}".format(config.source['class']))
-
     if args['--fetch']:
-        fetch(config, current_souce,
-              load_providers(config.providers['modules_path']))
+        Fetcher.fetch()
     elif args['--sort']:
-        sort(config, current_souce)
+        Fetcher.sort()
     else:
-        runner.start(args, config)
+        Fetcher.start()
 
 if __name__ == '__main__':
     main()
