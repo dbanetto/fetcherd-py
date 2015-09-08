@@ -75,7 +75,6 @@ class Fetcherd:
 
         self.sort_lock = False
 
-
     def fetch(self, source=None, base_providers=None):
         if source is None:
             source = self.source
@@ -121,7 +120,7 @@ class Fetcherd:
                     if numb > series['current_count']:
                         logger.info('Downloading {}'.format(title))
                         (dwn, name) = provider.download(link, self.config)
-                        download(self.config, dwn, name)
+                        self.download(dwn, name)
 
                 if current > series['current_count']:
                     logging.info('Updating {} to episode count {}'
