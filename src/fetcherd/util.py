@@ -3,7 +3,6 @@ import logging
 import pkgutil
 import imp
 
-from glob import glob
 from os import path
 from fetcherd.provider import Provider
 from fetcherd.source import Source

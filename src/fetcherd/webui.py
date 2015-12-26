@@ -1,8 +1,5 @@
 from bottle import Bottle
 
-import fetcherd
-
-import json
 
 class WebUI(Bottle):
 
@@ -42,7 +39,6 @@ class WebUI(Bottle):
         if 'server' in self.config.webui and self.config.webui['server'] is str:
             server = self.config.webui['server']
 
-
         super(WebUI, self).run(host=host, port=port, server=server)
 
     def index(self):
@@ -50,7 +46,9 @@ class WebUI(Bottle):
 
     def status(self):
         return {
-            'running' : True,
+            'running': True,
+            'fetch_lock': self.fetcher.fetch_lock,
+            'sort_lock': self.fetcher.sort_lock
         }
 
     def force_fetch(self):
@@ -82,12 +80,3 @@ class WebUI(Bottle):
         for (key, prov) in self.fetcher.providers.items():
             options[key] = prov.get_options_schema()
         return options
-
-    def reload_providers(self):
-        pass
-
-    def reload_source(self):
-        pass
-
-    def reload_config(self):
-        pass

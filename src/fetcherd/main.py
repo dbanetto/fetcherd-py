@@ -55,6 +55,7 @@ logging.config.dictConfig({
     }
 })
 
+
 def daemonize(fetcher, args, config):
     logger = logging.getLogger('daemon')
     pid = config.daemon['pid'] if 'pid' in config.daemon else '/tmp/fetcherd.pid'
@@ -98,6 +99,7 @@ def daemon_setup(fetcher, args, config):
     logger.info("Running as user {}".format(getpass.getuser()))
 
     fetcher.start()
+
 
 def main():
     args = docopt(__doc__, version='fetcherd 0.1')
