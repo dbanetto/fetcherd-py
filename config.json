@@ -1,0 +1,45 @@
+{
+    "source": {
+        "modules_path": "sources",
+        "class": "web_client",
+        "settings": {
+            "url": "http://localhost:8000/"
+        }
+    },
+    "providers": {
+        "modules_path": "providers",
+        "blacklist": [],
+        "whitelist": []
+    },
+    "daemon": {
+        "pid": "/tmp/fetcherd.pid"
+    },
+    "webui": {
+        "enable": true,
+        "host": "localhost",
+        "port": 8181
+    },
+    "fetch": {
+        "save_paths": {
+            "mp3$": "./podcasts"
+        },
+        "save_path_default": "./downloads",
+
+        "check_filesystem": true,
+        "search_paths": [
+            "./podcasts"
+        ]
+    },
+    "sort": {
+        "save_paths": {
+            "rss": "./podcast"
+        },
+        "save_path_default": "./sorted",
+        "search_paths": [
+            "./downloads"
+        ],
+        "providers_to_move": [
+            "roosterteeth"
+        ]
+    }
+}
