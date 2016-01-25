@@ -2,10 +2,13 @@ import re
 import logging
 import pkgutil
 import imp
+import os
 
 from os import path
 from fetcherd.provider import Provider
 from fetcherd.source import Source
+
+_ROOT = path.abspath(path.dirname(__file__))
 
 
 def get_path(name, folders, default=None):
@@ -32,6 +35,17 @@ def load_source(src_path, current):
     return load_modules(src_path,
                         parent_type=Source,
                         whitelist=[current])[current]
+
+
+def get_data(path):
+    return os.path.join(_ROOT, 'data', path)
+
+
+def get_config_home():
+    if os.environ.get('XDG_CONFIG_HOME'):
+        return os.path.join(os.environ.get('XDG_CONFIG_HOME'), 'fetcherd')
+
+    return os.path.join(os.environ['HOME'], '.config', 'fetcherd')
 
 
 def load_modules(src_path, parent_type=object, whitelist=None, blacklist=None):

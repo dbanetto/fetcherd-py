@@ -11,8 +11,8 @@ Options:
     -h --help                   Show this screen
     --version                   Show version
     -d --daemon                 Run as daemon
-    -c <path> --config=<path>   Config path [default: /etc/fetcherd/config.json]
-    --log=<path>                Path to save log [default: /tmp/fetcherd.log]
+    -c <path> --config=<path>   Config path 
+    --log=<path>                Path to save log 
     --verbose                   Raise log level
     --fetch                     Run fetch
     --sort                      Run sort
