@@ -34,7 +34,7 @@ class WebClient(Source):
             dict made from the json of the series in fetch-django
         """
         try:
-            r = requests.get(self.url + 'series/?filter=week',
+            r = requests.get(self.url + 'series/',
                              headers={'Content-Type': 'application/json'})
             return r.json()
         except ConnectionError as e:
