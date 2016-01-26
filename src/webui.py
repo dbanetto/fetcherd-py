@@ -1,3 +1,5 @@
+import logging
+
 from bottle import Bottle
 
 
@@ -5,6 +7,7 @@ class WebUI(Bottle):
 
     def __init__(self, fetcher, config):
         super(WebUI, self).__init__()
+        self.logger = logging.getLogger('webui')
         self.fetcher = fetcher
         self.config = config
         self._route()
@@ -39,6 +42,9 @@ class WebUI(Bottle):
         if 'server' in self.config.webui and self.config.webui['server'] is str:
             server = self.config.webui['server']
 
+        self.logger.info('Starting webui on {}:{} using {}'
+                         .format(host, port, server))
+
         super(WebUI, self).run(host=host, port=port, server=server)
 
     def index(self):
@@ -58,6 +64,7 @@ class WebUI(Bottle):
                 'success': True
             }
         except Exception as e:
+            self.logger.error('Error during force fetch: {}'.format(str(e)))
             return {
                 'success': False,
                 'error': '{}'.format(str(e))
@@ -70,6 +77,7 @@ class WebUI(Bottle):
                 'success': True
             }
         except Exception as e:
+            self.logger.error('Error during force sort: {}'.format(str(e)))
             return {
                 'success': False,
                 'error': '{}'.format(str(e))
