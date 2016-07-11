@@ -90,7 +90,7 @@ def daemon_setup(fetcher, args, config):
     logger.addHandler(file)
     logging.getLogger('').addHandler(file)
 
-    logger.debug("Setup log file in {}".format(args['--log']))
+    logger.debug("Setup log file in {}".format(log_path))
 
     working_dir = config.daemon['working_dir'] if 'working_dir' in config.daemon else '/tmp'
 
