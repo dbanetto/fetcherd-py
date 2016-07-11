@@ -88,7 +88,8 @@ class WebUI(Bottle):
 
     def log(self):
         try:
-            logs = os.popen('tail -1000 {}'.format(self.config['log'])).readlines()
+            self.logger.info('Getting log from {}'.format(self.config.daemon['log']))
+            logs = os.popen('tail -1000 {}'.format(self.config.daemon['log'])).readlines()
             return {
                 'success': True,
                 'log': logs
