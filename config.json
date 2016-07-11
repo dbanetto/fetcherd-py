@@ -12,7 +12,8 @@
         "whitelist": []
     },
     "daemon": {
-        "pid": "/tmp/fetcherd.pid"
+        "pid": "/tmp/fetcherd.pid",
+        "log": "/tmp/fetcherd.log"
     },
     "webui": {
         "enable": true,

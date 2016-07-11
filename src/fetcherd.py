@@ -98,11 +98,11 @@ class Fetcherd:
         try:
             self.fetch_lock = True
             providers = {}
-            logger = logging.getLogger('fetcherd')
+            logger = logging.getLogger('fetcher')
 
             for prov in source.get_base_providers():
                 if prov['name'] not in base_providers:
-                    logger.warning('Unsupported Base Provider : ' + prov['name'])
+                    logger.warning('Unsupported Base Provider: {0}'.format(prov['name'])) 
                 else:
                     logger.info('Loaded {}'.format(prov['name']))
 
@@ -114,10 +114,8 @@ class Fetcherd:
                                 .format(prov['name'],
                                         prov['base_provider_options']))
                 else:
-                    logger.warning('Unsupported Base Provider \"' +
-                                   prov['base_provider'] +
-                                   "\" used by " +
-                                   prov['name'])
+                    logger.warning('Unsupported Base Provider \"{0}\" used by {1}'
+                                    .format(prov['base_provider'], prov['name']))
 
             for series in source.get_series():
                 if series['provider_id'] in providers:
@@ -139,19 +137,21 @@ class Fetcherd:
                                      .format(series['title'], current))
                         source.post_update_episode_count(series['id'], current)
 
-                    else:
-                        logger.warning("Unsupported provider id: {}"
-                                       .format(series['provider_id']))
+                else:
+                    logger.warning("Unsupported provider id: {}"
+                                   .format(series['provider_id']))
         except Exception as e:
             logging.error('Error: {}'.format(str(e)))
         finally:
             self.fetch_lock = False
 
     def download(self, stream, filename):
-        logger = logging.getLogger('fetcherd')
+        logger = logging.getLogger('downloads')
         path = get_path_regex(filename, self.config.fetch['save_paths'],
                               default=self.config.fetch['save_path_default'])
+
         logger.info("Downloading {} to {}".format(filename, path))
+
         with open(os.path.join(path, filename), 'wb') as f:
             for chunk in stream:
                 if chunk:

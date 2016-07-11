@@ -1,3 +1,4 @@
+import os
 import logging
 
 from bottle import Bottle
@@ -16,6 +17,8 @@ class WebUI(Bottle):
         # Double ups to support both trailing and non-trailing slashes
         # GET
         self.get('/', callback=self.index)
+        self.get('/log', callback=self.log)
+        self.get('/log/', callback=self.log)
         self.get('/status', callback=self.status)
         self.get('/status/', callback=self.status)
         self.get('/dump_provider_options', callback=self.dump_providers)
@@ -75,6 +78,20 @@ class WebUI(Bottle):
             self.fetcher.sort()
             return {
                 'success': True
+            }
+        except Exception as e:
+            self.logger.error('Error during force sort: {}'.format(str(e)))
+            return {
+                'success': False,
+                'error': '{}'.format(str(e))
+            }
+
+    def log(self):
+        try:
+            logs = os.popen('tail -1000 {}'.format(self.config['log'])).readlines()
+            return {
+                'success': True,
+                'log': logs
             }
         except Exception as e:
             self.logger.error('Error during force sort: {}'.format(str(e)))

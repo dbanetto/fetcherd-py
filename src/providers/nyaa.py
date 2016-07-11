@@ -69,7 +69,7 @@ class Nyaa(Provider):
                 continue
 
             # remove series name and search for episode number
-            numbs = regex.findall(title.replace(series['search_title'], ''))
+            numbs = regex.findall(title.replace(search_title, ''))
             if len(numbs) > 0:
                 numb = int(numbs[0])
             else:

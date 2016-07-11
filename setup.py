@@ -11,6 +11,7 @@ setup(name='fetcherd',
                    'fetcherd.sources': 'src/sources',
                    'fetcherd.providers': 'src/providers',
                    },
+      data_files=[('config', ['config/config.json'])],
       install_requires=[
           'requests',
           'docopts',

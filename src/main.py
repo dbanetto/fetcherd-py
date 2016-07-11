@@ -3,7 +3,7 @@
 Usage:
     fetcherd (-h | --help)
     fetcherd --version
-    fetcherd [-d | --daemon] [-c <path> | --config=<config>] [--log=<path>] [--verbose]
+    fetcherd [-d | --daemon] [-c <path> | --config=<config>]
     fetcherd [--fetch | --sort] [-c <path> | --config=<config>]
     fetcherd --dump-providers [-c <path> | --config=<config>]
 
@@ -12,8 +12,6 @@ Options:
     --version                   Show version
     -d --daemon                 Run as daemon
     -c <path> --config=<path>   Config path 
-    --log=<path>                Path to save log 
-    --verbose                   Raise log level
     --fetch                     Run fetch
     --sort                      Run sort
     --push-providers            Prints provider schema
@@ -77,8 +75,10 @@ def daemonize(fetcher, args, config):
 
 
 def daemon_setup(fetcher, args, config):
+    log_path = config.daemon['log'] if 'log' in config.daemon else 'fetcherd.log'
+    config.daemon['log'] = log_path
     file = handlers.RotatingFileHandler(
-        args['--log'],
+        log_path,
         maxBytes=10485760,
         encoding='utf8'
     )
