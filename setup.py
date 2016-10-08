@@ -3,7 +3,7 @@
 from setuptools import setup
 
 setup(name='fetcherd',
-      version='0.1',
+      version='0.1.1',
       description='Python implementation of fetcherd daemon',
       author='David Barnett',
       packages=['fetcherd', 'fetcherd.sources', 'fetcherd.providers'],

@@ -2,6 +2,7 @@ import re
 import logging
 from urllib.parse import quote_plus
 import requests
+import cgi
 import xml.etree.ElementTree as ET
 
 from fetcherd.provider import Provider
@@ -98,8 +99,8 @@ class Nyaa(Provider):
         filename = link.split('/')[-1]
 
         if 'content-disposition' in re.headers:
-            for item in re.headers['content-disposition'].split(';'):
-                if 'filename=' in item:
-                    filename = item.split('=')[-1].strip('"')
+            header = re.headers['content-disposition']
+            value, params = cgi.parse_header(header)
+            filename = params['filename']
 
         return (re.iter_content(chunk_size=1024), filename)
