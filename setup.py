@@ -3,20 +3,18 @@
 from setuptools import setup
 
 setup(name='fetcherd',
-      version='0.1.1',
+      version='0.2.0',
       description='Python implementation of fetcherd daemon',
       author='David Barnett',
       packages=['fetcherd', 'fetcherd.sources', 'fetcherd.providers'],
       package_dir={'fetcherd': 'src',
                    'fetcherd.sources': 'src/sources',
                    'fetcherd.providers': 'src/providers',
-                   },
+      },
       data_files=[('config', ['config/config.json'])],
       install_requires=[
           'requests',
           'docopts',
-          'apscheduler',
-          'daemonize',
           'bottle',
           'paste'
       ],
@@ -25,4 +23,4 @@ setup(name='fetcherd',
               'fetcherd=fetcherd.main:main'
           ]
       }
-      )
+)

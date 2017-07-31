@@ -6,8 +6,6 @@ from os import path
 
 from fetcherd.settings import Settings
 from fetcherd.util import get_path, get_path_regex, load_source, load_providers
-from apscheduler.schedulers.background import BlockingScheduler, BackgroundScheduler
-
 
 class Fetcherd:
 
@@ -159,25 +157,6 @@ class Fetcherd:
                     f.flush()
 
     def start(self):
-        if self.config.webui['enable']:
-            scheduler = BackgroundScheduler(
-                logger=logging.getLogger('schedule'))
-            logging.info("Using Background Scheduler")
-        else:
-            scheduler = BlockingScheduler(logger=logging.getLogger('schedule'))
-            logging.info("Using Blocking Scheduler")
-
-        scheduler.add_job(lambda: self.fetch(),
-                          'cron', minute=30, id='fetch')
-        scheduler.add_job(lambda: self.sort(),
-                          'cron', minute=00, id='sort')
-
-        # run once at launch
-        self.fetch()
-        self.sort()
-
-        scheduler.start()
-
         if self.config.webui['enable']:
             logging.debug("Setting up WebUI")
             from fetcherd.webui import WebUI

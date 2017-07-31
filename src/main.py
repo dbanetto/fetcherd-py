@@ -3,14 +3,13 @@
 Usage:
     fetcherd (-h | --help)
     fetcherd --version
-    fetcherd [-d | --daemon] [-c <path> | --config=<config>]
+    fetcherd [-c <path> | --config=<config>]
     fetcherd [--fetch | --sort] [-c <path> | --config=<config>]
     fetcherd --dump-providers [-c <path> | --config=<config>]
 
 Options:
     -h --help                   Show this screen
     --version                   Show version
-    -d --daemon                 Run as daemon
     -c <path> --config=<path>   Config path 
     --fetch                     Run fetch
     --sort                      Run sort
@@ -21,7 +20,6 @@ from docopt import docopt
 from fetcherd.settings import Settings
 from fetcherd.fetcherd import Fetcherd
 
-from daemonize import Daemonize
 import logging
 import os
 import logging.config
@@ -53,33 +51,12 @@ logging.config.dictConfig({
     }
 })
 
-
-def daemonize(fetcher, args, config):
-    logger = logging.getLogger('daemon')
-    pid = config.daemon['pid'] if 'pid' in config.daemon else '/tmp/fetcherd.pid'
-    user = config.daemon['user'] if 'user' in config.daemon else None
-    group = config.daemon['group'] if 'group' in config.daemon else None
-
-    daemon = Daemonize("fetcherd",
-                       pid,
-                       daemon_setup,
-                       privileged_action=lambda: [fetcher, args, config],
-                       user=user,
-                       group=group,
-                       )
-    try:
-        logger.info("Forked")
-        daemon.start()
-    except Exception as e:
-        logger.critical("Error during daemonize: {}".format(e))
-
-
-def daemon_setup(fetcher, args, config):
+def run(fetcher, args, config):
     log_path = config.daemon['log'] if 'log' in config.daemon else 'fetcherd.log'
     config.daemon['log'] = log_path
     file = handlers.RotatingFileHandler(
         log_path,
-        maxBytes=10485760,
+        maxBytes= 4 * 1024 * 1024,
         encoding='utf8'
     )
     file.setLevel(logging.DEBUG)
@@ -108,22 +85,19 @@ def main():
 
     Fetcher = Fetcherd(args, config)
 
-    if args['--daemon']:
-        daemonize(Fetcher, args, config)
-    elif args['--dump-providers']:
+    logger.debug("Start with args {}".format(args))
+
+    if args['--dump-providers']:
         import json
         for (key, prov) in Fetcher.providers.items():
             print(key, json.dumps(prov.get_options_schema()))
         exit(0)
-
-    logger.debug("Start with args {}".format(args))
-
-    if args['--fetch']:
+    elif args['--fetch']:
         Fetcher.fetch()
     elif args['--sort']:
         Fetcher.sort()
     else:
-        Fetcher.start()
+        run(Fetcher, args, config)
 
 if __name__ == '__main__':
     main()

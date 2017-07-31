@@ -1,18 +1,17 @@
 {
     "source": {
-        "modules_path": "sources",
+        "modules_path": "src/sources",
         "class": "web_client",
         "settings": {
             "url": "http://localhost:8000/"
         }
     },
     "providers": {
-        "modules_path": "providers",
+        "modules_path": "src/providers",
         "blacklist": [],
         "whitelist": []
     },
     "daemon": {
-        "pid": "/tmp/fetcherd.pid",
         "log": "/tmp/fetcherd.log"
     },
     "webui": {
